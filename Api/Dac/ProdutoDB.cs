@@ -17,6 +17,15 @@ namespace Api.Dac
             Configuration = configuration;
         }
 
+        public string BuscarPorContaId(int contaId)
+        {
+            DynamicParameters parametros = new DynamicParameters();
+            parametros.Add("ContaID", contaId);
+
+            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+                return con.Query<string>("Produtos.BuscarPorContaId", parametros, commandType: CommandType.StoredProcedure).FirstOrDefault();
+        }
+
         public Produto BuscarPorId(int id)
         {
             DynamicParameters parametros = new DynamicParameters();
@@ -30,6 +39,12 @@ namespace Api.Dac
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
                 return con.Query<Produto>("Produtos.Listar", null, commandType: CommandType.StoredProcedure);
+        }
+
+        public IEnumerable<Produto> Ranking()
+        {
+            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+                return con.Query<Produto>("Produtos.Ranking", null, commandType: CommandType.StoredProcedure);
         }
     }
 }

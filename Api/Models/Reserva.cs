@@ -6,22 +6,22 @@ namespace Api.Models
     {
         public int Id { get; set; }
 
-        public DateTime Horario { get; set; }
+        public int UsuarioId { get; set; }
+
+        public int MesaId { get; set; }
+
+        public DateTime DataReserva { get; set; }
 
         public int QuantidadePessoas { get; set; }
 
-        public string Senha { get; set; }
+        public string SenhaCheckin { get; set; }
 
-        public DateTime CheckIn { get; set; }
+        public DateTime DataCheckIn { get; set; }
 
-        public DateTime CheckOut { get; set; }
+        public DateTime DataCheckOut { get; set; }
 
-        public DateTime PrevisaoChegada { get; set; }
-
-        public TimeSpan TempoEspera { get; set; }
+        public TimeSpan TempoDeEspera { get; set; }
 
         public string Status { get; set; }
-
-        public Conta Conta { get; set; }
     }
 }

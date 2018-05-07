@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using Api.Dac;
 using Api.Models;
+using Api.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Api.Controllers
 {
@@ -12,25 +13,30 @@ namespace Api.Controllers
     public class CategoriasController : Controller
     {
         private readonly ICategoriaDac _categoriaDac;
+        private readonly ILogger _logger;
 
-        public CategoriasController(ICategoriaDac categoriaDac)
+        public CategoriasController(ICategoriaDac categoriaDac, ILogger<CategoriasController> logger)
         {
             _categoriaDac = categoriaDac;
+            _logger = logger;
         }
 
         [HttpGet]
         [Route("Listar")]
-        public IEnumerable<Categoria> Listar()
+        public IActionResult Listar()
         {
             try
             {
-                return _categoriaDac.Listar();
+                IEnumerable<Categoria> categorias = _categoriaDac.Listar();
+                if (categorias == null)
+                    return NotFound("Não há categorias para listar.");
+
+                return Ok(categorias);
             }
             catch (Exception ex)
             {
-                //Logar exception
-                Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return null;
+                _logger.LogError(EventosLog.CategoriasListar, ex, ex.Message);
+                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
     }

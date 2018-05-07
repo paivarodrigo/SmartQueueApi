@@ -3,6 +3,7 @@ using Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Api.Utils;
+using Microsoft.Extensions.Logging;
 
 namespace Api.Controllers
 {
@@ -11,10 +12,12 @@ namespace Api.Controllers
     public class UsuariosController : Controller
     {
         private readonly IUsuarioDac _usuarioDac;
+        private readonly ILogger _logger;
 
-        public UsuariosController(IUsuarioDac usuarioDac)
+        public UsuariosController(IUsuarioDac usuarioDac, ILogger<UsuariosController> logger)
         {
             _usuarioDac = usuarioDac;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -24,16 +27,15 @@ namespace Api.Controllers
             try
             {
                 if (usuario == null)
-                    return BadRequest();
+                    return BadRequest("Entradas inválidas para cadastro de usuário.");
 
-                Usuario _usuario;
-                _usuario = _usuarioDac.BuscarPorCPF(usuario.Cpf);
+                Usuario _usuario = _usuarioDac.BuscarPorCPF(usuario.Cpf);
                 if (_usuario != null)
-                    return BadRequest("Este CPF já é cadastrado.");
+                    return BadRequest("Este CPF já está cadastrado.");
 
                 _usuario = _usuarioDac.BuscarPorEmail(usuario.Email);
                 if (_usuario != null)
-                    return BadRequest("Este e-mail já é cadastrado.");
+                    return BadRequest("Este email já está cadastrado.");
 
                 // Criptografa a senha
                 usuario.Senha = Gerador.HashMd5(usuario.Senha);
@@ -43,7 +45,7 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                //Logar exception
+                _logger.LogError(EventosLog.UsuariosCriar, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
@@ -71,7 +73,7 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                //Logar exception
+                _logger.LogError(EventosLog.UsuariosLogar, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
@@ -100,7 +102,7 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                //Logar exception
+                _logger.LogError(EventosLog.UsuariosRecuperarSenhaPorCpf, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
@@ -129,37 +131,38 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                //Logar exception
+                _logger.LogError(EventosLog.UsuariosRecuperarSenhaPorEmail, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
 
-        [HttpPost()]
+        [HttpPost]
         [Route("AlterarSenha")]
         public IActionResult AlterarSenha([FromBody] UsuarioNovaSenha model)
         {
             try
             {
                 if (model == null || model.UsuarioAtual == null || model.NovaSenha == null)
-                    return BadRequest(new { Mensagem = "Entrada inválida." });
+                    return BadRequest("Entradas inválidas.");
 
                 Usuario _usuario = _usuarioDac.BuscarPorId(model.UsuarioAtual.Id);
                 if (_usuario == null)
-                    return NotFound(new { Mensagem = "O usuário não foi encontrado." });
+                    return NotFound("O usuário não foi encontrado.");
 
                 // Validar senha atual criptografada
-                if (Gerador.HashMd5(model.UsuarioAtual.Senha) != _usuario.Senha)
-                    return BadRequest(new { Mensagem = "Falha de autenticação." });
+                if (model.UsuarioAtual.Senha != _usuario.Senha)
+                    return BadRequest("Falha de autenticação.");
 
                 // Criptografa a nova senha
                 model.NovaSenha = Gerador.HashMd5(model.NovaSenha);
 
                 _usuarioDac.AlterarSenha(model.UsuarioAtual.Id, model.NovaSenha);
-                return Ok();
+                _usuario.Senha = model.NovaSenha;
+                return Ok(_usuario);
             }
             catch (Exception ex)
             {
-                //Logar exception
+                _logger.LogError(EventosLog.UsuariosAlterarSenha, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
@@ -170,11 +173,11 @@ namespace Api.Controllers
         {
             try
             {
-                return Ok();
+                return Ok(new Usuario());
             }
             catch (Exception ex)
             {
-                //Logar exception
+                _logger.LogError(EventosLog.UsuariosSair, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }

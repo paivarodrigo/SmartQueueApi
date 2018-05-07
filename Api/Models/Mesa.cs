@@ -6,7 +6,9 @@
 
         public string Descricao { get; set; }
 
-        public int QuantidadeAssento { get; set; }
+        public int Numero { get; set; }
+
+        public int QuantidadeAssentos { get; set; }
 
         public bool Disponivel { get; set; }
     }

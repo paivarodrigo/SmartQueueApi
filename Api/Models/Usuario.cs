@@ -19,7 +19,5 @@ namespace Api.Models
         public string CidadeNatal { get; set; }
 
         public string Senha { get; set; }
-
-        public Reserva Reserva { get; set; }
     }
 }

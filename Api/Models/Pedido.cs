@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Api.Models
 {
@@ -7,12 +6,10 @@ namespace Api.Models
     {
         public int Id { get; set; }
 
-        public decimal Valor { get; set; }
+        public int ContaId { get; set; }
 
         public DateTime Data { get; set; }
 
         public string Status { get; set; }
-
-        public IEnumerable<ItemPedido> ItensPedido { get; set; }
     }
 }

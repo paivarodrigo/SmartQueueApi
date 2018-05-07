@@ -8,5 +8,9 @@ namespace Api.Dac
         IEnumerable<Produto> Listar();
 
         Produto BuscarPorId(int id);
+
+        IEnumerable<Produto> Ranking();
+
+        string BuscarPorContaId(int contaId);
     }
 }
