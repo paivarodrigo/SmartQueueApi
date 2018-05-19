@@ -21,12 +21,12 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        [Route("ConsultarAtual/{usuarioId}")]
-        public IActionResult ConsultarAtual(int usuarioId)
+        [Route("Consultar/{reservaId}")]
+        public IActionResult Consultar(int reservaId)
         {
             try
             {
-                Historico historicoDeHoje = _contaDac.ConsultarAtual(usuarioId);
+                Historico historicoDeHoje = _contaDac.ConsultarPorReservaId(reservaId);
                 if (historicoDeHoje == null)
                     return NotFound("Não há uma conta em aberto.");
 

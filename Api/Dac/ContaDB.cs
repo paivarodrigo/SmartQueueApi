@@ -17,12 +17,12 @@ namespace Api.Dac
             Configuration = configuration;
         }
 
-        public Historico ConsultarAtual(int usuarioId)
+        public Historico ConsultarPorReservaId(int reservaId)
         {
             DynamicParameters parametros = new DynamicParameters();
-            parametros.Add("UsuarioID", usuarioId);
+            parametros.Add("ReservaID", reservaId);
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                return con.Query<Historico>("Contas.ConsultarAtual", parametros, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                return con.Query<Historico>("Contas.ConsultarPorReservaID", parametros, commandType: CommandType.StoredProcedure).FirstOrDefault();
         }
     }
 }

@@ -4,6 +4,6 @@ namespace Api.Dac
 {
     public interface IContaDac
     {
-        Historico ConsultarAtual(int usuarioId);
+        Historico ConsultarPorReservaId(int reservaId);
     }
 }

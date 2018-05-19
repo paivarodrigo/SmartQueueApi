@@ -41,5 +41,37 @@ namespace Api.Controllers
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
+
+        [HttpPost]
+        [Route("SolicitarReserva")]
+        public IActionResult SolicitarReserva([FromBody] Usuario usuario)
+        {
+            try
+            {
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventosLog.SolicitarReserva, ex, ex.Message);
+                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+            }
+        }
+
+        [HttpGet]
+        [Route("ConsultarTempoDeEspera/{quantidadePessoas}")]
+        public IActionResult ConsultarTempoDeEspera(int quantidadePessoas)
+        {
+            try
+            {
+                //TimeSpan tempoDeEspera = CalcularTempoDeEspera(quantidadePessoas);
+                TimeSpan tempoDeEspera = new TimeSpan(0, 28, 0); //0 horas, 28 minutos e 0 segundos
+                return Ok(new { TempoDeEspera = tempoDeEspera });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventosLog.ConsultarTempoDeEspera, ex, ex.Message);
+                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+            }
+        }
     }
 }
