@@ -25,7 +25,7 @@ namespace Api.Utils
             return sBuilder.ToString();
         }
 
-        public static string NovaSenha()
+        public static string GerarSenhaUsuario()
         {
             string guid = Guid.NewGuid().ToString().Replace("-", "");
 
@@ -37,6 +37,20 @@ namespace Api.Utils
                 senha += guid.Substring(clsRan.Next(1, guid.Length), 1);
 
             return senha;
+        }
+
+        public static string GerarSenhaDaReserva()
+        {
+            string guid = Guid.NewGuid().ToString().Replace("-", "");
+
+            Random clsRan = new Random();
+            Int32 tamanhoSenha = clsRan.Next(5, 5);
+
+            string senha = "";
+            for (Int32 i = 0; i <= tamanhoSenha; i++)
+                senha += guid.Substring(clsRan.Next(1, guid.Length), 1);
+
+            return senha.ToUpper();
         }
     }
 }

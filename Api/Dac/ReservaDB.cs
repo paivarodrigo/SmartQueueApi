@@ -17,6 +17,16 @@ namespace Api.Dac
             Configuration = configuration;
         }
 
+        public Reserva AtivarReserva(Reserva reserva, int numeroDaMesa)
+        {
+            DynamicParameters parametros = new DynamicParameters();
+            parametros.Add("SenhaDaReserva", reserva.SenhaCheckIn);
+            parametros.Add("NumeroDaMesa", numeroDaMesa);
+
+            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+                return con.Query<Reserva>("Reservas.AtivarReserva", parametros, commandType: CommandType.StoredProcedure).FirstOrDefault();
+        }
+
         public Conta BuscarConta(int reservaId)
         {
             DynamicParameters parametros = new DynamicParameters();
@@ -51,6 +61,18 @@ namespace Api.Dac
 
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
                 return con.Query<Reserva>("Reservas.BuscarFinalizadasDoUsuario", parametros, commandType: CommandType.StoredProcedure).FirstOrDefault();
+        }
+
+        public Reserva SolicitarReserva(Reserva reserva)
+        {
+            DynamicParameters parametros = new DynamicParameters();
+            parametros.Add("UsuarioID", reserva.UsuarioId);
+            parametros.Add("QuantidadePessoas", reserva.QuantidadePessoas);
+            parametros.Add("SenhaDaReserva", reserva.SenhaCheckIn);
+            parametros.Add("TempoDeEspera", reserva.TempoDeEspera);
+
+            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+                return con.Query<Reserva>("Reservas.SolicitarReserva", parametros, commandType: CommandType.StoredProcedure).FirstOrDefault();
         }
     }
 }

@@ -91,7 +91,7 @@ namespace Api.Controllers
                 if (usuario == null)
                     return NotFound("O usuário não foi encontrado.");
 
-                usuario.Senha = Gerador.NovaSenha();
+                usuario.Senha = Gerador.GerarSenhaUsuario();
                 Email.EnviarNovaSenha(usuario.Email, usuario.Nome + " " + usuario.Sobrenome, usuario.Senha);
 
                 // Criptografa a nova senha
@@ -120,7 +120,7 @@ namespace Api.Controllers
                 if (usuario == null)
                     return NotFound("O usuário não foi encontrado.");
 
-                usuario.Senha = Gerador.NovaSenha();
+                usuario.Senha = Gerador.GerarSenhaUsuario();
                 Email.EnviarNovaSenha(usuario.Email, usuario.Nome + " " + usuario.Sobrenome, usuario.Senha);
 
                 // Criptografa a nova senha

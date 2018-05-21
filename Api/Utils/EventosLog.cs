@@ -24,8 +24,9 @@
         // Reservas
         public const int Reservas = 4000;
         public const int ReservasHistorico = 4001;
-        public const int ConsultarTempoDeEspera = 4002;
-        public const int SolicitarReserva = 4003;
+        public const int ReservasConsultarTempoDeEspera = 4002;
+        public const int ReservasSolicitar = 4003;
+        public const int ReservasAtivar = 4004;
 
         // Contas
         public const int Contas = 5000;

@@ -12,5 +12,9 @@ namespace Api.Dac
         Conta BuscarConta(int reservaId);
 
         IEnumerable<Historico> BuscarHistorico(int usuarioId);
+
+        Reserva SolicitarReserva(Reserva reserva);
+
+        Reserva AtivarReserva(Reserva reserva, int numeroDaMesa);
     }
 }

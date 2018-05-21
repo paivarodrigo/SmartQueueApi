@@ -43,16 +43,45 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        [Route("SolicitarReserva")]
-        public IActionResult SolicitarReserva([FromBody] Usuario usuario)
+        [Route("Solicitar")]
+        public IActionResult Solicitar([FromBody] Reserva reserva)
         {
             try
             {
-                return null;
+                if (reserva == null)
+                    return BadRequest("Não foi possível solicitar a reserva.");
+                reserva.SenhaCheckIn = Gerador.GerarSenhaDaReserva();
+                reserva = _reservaDac.SolicitarReserva(reserva);
+                if (reserva == null)
+                    return BadRequest("Já existe uma reserva na fila ou ativa.");
+
+                return Ok(reserva);
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventosLog.SolicitarReserva, ex, ex.Message);
+                _logger.LogError(EventosLog.ReservasSolicitar, ex, ex.Message);
+                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+            }
+        }
+
+        [HttpPost]
+        [Route("Ativar/{numeroDaMesa}")]
+        public IActionResult Ativar([FromBody] Reserva reserva, int numeroDaMesa)
+        {
+            try
+            {
+                if (reserva == null)
+                    return BadRequest("Não foi possível ativar a reserva.");
+
+                reserva = _reservaDac.AtivarReserva(reserva, numeroDaMesa);
+                if (reserva == null)
+                    return BadRequest("Não foi possível ativar a reserva.");
+
+                return Ok(reserva);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventosLog.ReservasAtivar, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
@@ -69,7 +98,7 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventosLog.ConsultarTempoDeEspera, ex, ex.Message);
+                _logger.LogError(EventosLog.ReservasConsultarTempoDeEspera, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }

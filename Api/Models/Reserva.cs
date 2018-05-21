@@ -14,7 +14,7 @@ namespace Api.Models
 
         public int QuantidadePessoas { get; set; }
 
-        public string SenhaCheckin { get; set; }
+        public string SenhaCheckIn { get; set; }
 
         public DateTime DataCheckIn { get; set; }
 
