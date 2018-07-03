@@ -4,7 +4,7 @@ namespace Api.Dac
 {
     public interface IUsuarioDac
     {
-        void Criar(Usuario usuario);
+        void CadastrarCliente(Usuario usuario);
 
         void AlterarSenha(int id, string senha);
 

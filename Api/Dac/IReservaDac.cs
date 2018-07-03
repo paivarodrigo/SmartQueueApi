@@ -7,14 +7,16 @@ namespace Api.Dac
     {
         Reserva BuscarUltimaFinalizadaDoUsuario(int usuarioId);
 
-        string BuscarMesasDaReserva(int reservaId);
-
         Conta BuscarConta(int reservaId);
 
-        IEnumerable<Historico> BuscarHistorico(int usuarioId);
+        IEnumerable<Historico> ConsultarHistorico(int usuarioId);
 
         Reserva SolicitarReserva(Reserva reserva);
 
-        Reserva AtivarReserva(Reserva reserva, int numeroDaMesa);
+        Conta AtivarReserva(Reserva reserva, int numeroDaMesa);
+
+        int BuscarReservaIDPorSenha(int usuarioId, string senhaCheckIn);
+
+        bool CancelarReserva(int reservaID);
     }
 }

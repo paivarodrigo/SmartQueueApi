@@ -21,7 +21,6 @@ namespace Api
         {
             services.AddTransient<IUsuarioDac, UsuarioDB>();
             services.AddTransient<IProdutoDac, ProdutoDB>();
-            services.AddTransient<ICategoriaDac, CategoriaDB>();
             services.AddTransient<IReservaDac, ReservaDB>();
             services.AddTransient<IContaDac, ContaDB>();
             services.AddMvc();

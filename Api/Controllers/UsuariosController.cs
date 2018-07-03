@@ -21,8 +21,8 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        [Route("Criar")]
-        public IActionResult Criar([FromBody] Usuario usuario)
+        [Route("CadastrarCliente")]
+        public IActionResult CadastrarCliente([FromBody] Usuario usuario)
         {
             try
             {
@@ -40,12 +40,12 @@ namespace Api.Controllers
                 // Criptografa a senha
                 usuario.Senha = Gerador.HashMd5(usuario.Senha);
 
-                _usuarioDac.Criar(usuario);
+                _usuarioDac.CadastrarCliente(usuario);
                 return Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventosLog.UsuariosCriar, ex, ex.Message);
+                _logger.LogError(EventosLog.UsuariosCadastrarCliente, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }

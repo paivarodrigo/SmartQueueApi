@@ -5,11 +5,13 @@ namespace Api.Dac
 {
     public interface IProdutoDac
     {
-        IEnumerable<Produto> Listar();
+        IEnumerable<Categoria> ListarCategorias();
+
+        IEnumerable<Produto> ListarProdutos();
 
         Produto BuscarPorId(int id);
 
-        IEnumerable<Produto> Ranking();
+        IEnumerable<Produto> ConsultarRanking();
 
         string BuscarPorContaId(int contaId);
     }

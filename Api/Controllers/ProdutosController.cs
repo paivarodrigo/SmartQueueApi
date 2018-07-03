@@ -42,31 +42,37 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        [Route("Listar")]
-        public IActionResult Listar()
+        [Route("ConsultarCardapio")]
+        public IActionResult ConsultarCardapio()
         {
             try
             {
-                IEnumerable<Produto> produtos = _produtoDac.Listar();
+                // Busca lista de categorias
+                IEnumerable<Categoria> categorias = _produtoDac.ListarCategorias();
+                if (categorias == null)
+                    return NotFound("Não há categorias para listar.");
+
+                // Busca lista de produtos
+                IEnumerable<Produto> produtos = _produtoDac.ListarProdutos();
                 if (produtos == null)
                     return NotFound("Não há produtos para listar.");
 
-                return Ok(produtos);
+                return Ok(new { Categorias = categorias, Produtos = produtos });
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventosLog.ProdutosListar, ex, ex.Message);
+                _logger.LogError(EventosLog.ProdutosConsultarCardapio, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
 
         [HttpGet]
-        [Route("Ranking")]
-        public IActionResult Ranking()
+        [Route("ConsultarRanking")]
+        public IActionResult ConsultarRanking()
         {
             try
             {
-                IEnumerable<Produto> produtos = _produtoDac.Ranking();
+                IEnumerable<Produto> produtos = _produtoDac.ConsultarRanking();
                 if (produtos == null)
                     return NotFound("Não há dados para gerar o ranking.");
 
@@ -74,7 +80,7 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventosLog.ProdutosRanking, ex, ex.Message);
+                _logger.LogError(EventosLog.ProdutosConsultarRanking, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }

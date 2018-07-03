@@ -24,12 +24,12 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        [Route("Historico/{usuarioId}")]
-        public IActionResult Historico(int usuarioId)
+        [Route("ConsultarHistorico/{usuarioId}")]
+        public IActionResult ConsultarHistorico(int usuarioId)
         {
             try
             {
-                IEnumerable<Historico> historicos = _reservaDac.BuscarHistorico(usuarioId);
+                IEnumerable<Historico> historicos = _reservaDac.ConsultarHistorico(usuarioId);
                 if (historicos == null)
                     return NotFound("Não há dados para gerar histórico.");
 
@@ -37,19 +37,20 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventosLog.ReservasHistorico, ex, ex.Message);
+                _logger.LogError(EventosLog.ReservasConsultarHistorico, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
 
         [HttpPost]
-        [Route("Solicitar")]
-        public IActionResult Solicitar([FromBody] Reserva reserva)
+        [Route("SolicitarMesa")]
+        public IActionResult SolicitarMesa([FromBody] Reserva reserva)
         {
             try
             {
                 if (reserva == null)
                     return BadRequest("Não foi possível solicitar a reserva.");
+
                 reserva.SenhaCheckIn = Gerador.GerarSenhaDaReserva();
                 reserva = _reservaDac.SolicitarReserva(reserva);
                 if (reserva == null)
@@ -59,36 +60,36 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventosLog.ReservasSolicitar, ex, ex.Message);
+                _logger.LogError(EventosLog.ReservasSolicitarMesa, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
 
         [HttpPost]
-        [Route("Ativar/{numeroDaMesa}")]
-        public IActionResult Ativar([FromBody] Reserva reserva, int numeroDaMesa)
+        [Route("AtivarReserva/{numeroDaMesa}")]
+        public IActionResult AtivarReserva([FromBody] Reserva reserva, int numeroDaMesa)
         {
             try
             {
                 if (reserva == null)
                     return BadRequest("Não foi possível ativar a reserva.");
 
-                reserva = _reservaDac.AtivarReserva(reserva, numeroDaMesa);
-                if (reserva == null)
+                Conta conta = _reservaDac.AtivarReserva(reserva, numeroDaMesa);
+                if (conta == null)
                     return BadRequest("Não foi possível ativar a reserva.");
 
-                return Ok(reserva);
+                return Ok(conta);
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventosLog.ReservasAtivar, ex, ex.Message);
+                _logger.LogError(EventosLog.ReservasAtivarReserva, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
 
         [HttpGet]
-        [Route("ConsultarTempoDeEspera/{quantidadePessoas}")]
-        public IActionResult ConsultarTempoDeEspera(int quantidadePessoas)
+        [Route("ConsultarTempo/{quantidadePessoas}")]
+        public IActionResult ConsultarTempo(int quantidadePessoas)
         {
             try
             {
@@ -98,7 +99,33 @@ namespace Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventosLog.ReservasConsultarTempoDeEspera, ex, ex.Message);
+                _logger.LogError(EventosLog.ReservasConsultarTempo, ex, ex.Message);
+                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+            }
+        }
+
+        [HttpPost]
+        [Route("CancelarMesa")]
+        public IActionResult CancelarMesa([FromBody] Reserva reserva)
+        {
+            try
+            {
+                if (reserva == null || String.IsNullOrWhiteSpace(reserva.SenhaCheckIn))
+                    return BadRequest("Não foi possível cancelar a reserva.");
+
+                int reservaID = _reservaDac.BuscarReservaIDPorSenha(reserva.UsuarioId, reserva.SenhaCheckIn);
+
+                if (reservaID == 0)
+                    return NotFound("A reserva não foi encontrada.");
+
+                if (!_reservaDac.CancelarReserva(reservaID))
+                    return BadRequest("Esta reserva já foi utilizada ou cancelada.");
+
+                return Ok("A reserva foi cancelada com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventosLog.ReservasCancelarMesa, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }

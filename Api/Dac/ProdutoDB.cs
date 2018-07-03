@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using Api.Models;
 using Dapper;
 using Microsoft.Extensions.Configuration;
@@ -19,11 +17,21 @@ namespace Api.Dac
 
         public string BuscarPorContaId(int contaId)
         {
-            DynamicParameters parametros = new DynamicParameters();
-            parametros.Add("ContaID", contaId);
-
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                return con.Query<string>("Produtos.BuscarPorContaId", parametros, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                return con.QueryFirstOrDefault<string>(@"
+                    SELECT SUBSTRING(
+	                (
+		                SELECT ', ' + PR.Nome + ' R$' + REPLACE(CONVERT(VARCHAR, PR.Valor), '.', ',') + ' x ' + CONVERT(VARCHAR, SUM(IPE.Quantidade))
+		                    FROM Contas C
+		                   INNER JOIN Pedidos PE ON PE.ContaID = C.ID
+		                   INNER JOIN ItensPedidos IPE ON IPE.PedidoID = PE.ID
+		                   INNER JOIN Produtos PR ON PR.ID = IPE.ProdutoID
+		                   INNER JOIN PedidosStatus PS ON PS.ID = PE.StatusID
+		                   WHERE C.ID = @ContaID
+		                     AND PS.Nome = 'Finalizado'
+		                   GROUP BY PR.Nome, PR.Valor
+		                     FOR XML PATH('')
+	                ), 3, 100000) AS Produtos", new { ContaID = contaId });
         }
 
         public Produto BuscarPorId(int id)
@@ -32,19 +40,64 @@ namespace Api.Dac
             parametros.Add("ID", id);
 
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                return con.Query<Produto>("Produtos.BuscarPorId", parametros, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                return con.QueryFirstOrDefault<Produto>(@"
+                    SELECT ID,
+		                   Nome,
+		                   Descricao,
+		                   Valor,
+		                   CategoriaID,
+		                   Imagem
+	                  FROM Produtos
+	                 WHERE ID = @ID;", new { ID = id });
         }
 
-        public IEnumerable<Produto> Listar()
+        public IEnumerable<Categoria> ListarCategorias()
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                return con.Query<Produto>("Produtos.Listar", null, commandType: CommandType.StoredProcedure);
+                return con.Query<Categoria>(@"
+                    SELECT ID,
+		                   Caracteristica,
+		                   Tamanho
+	                  FROM Categorias;", null);
         }
 
-        public IEnumerable<Produto> Ranking()
+        public IEnumerable<Produto> ListarProdutos()
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                return con.Query<Produto>("Produtos.Ranking", null, commandType: CommandType.StoredProcedure);
+                return con.Query<Produto>(@"
+                    SELECT ID,
+		                   Nome,
+		                   Descricao,
+		                   Valor,
+		                   CategoriaID
+	                  FROM Produtos;", null);
+        }
+
+        public IEnumerable<Produto> ConsultarRanking()
+        {
+            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+                return con.Query<Produto>(@"
+                    SELECT TOP 5 RANK() OVER (ORDER BY Total DESC) AS Posicao,
+		                   ProdutoID,
+		                   Total
+	                  INTO #Ranking
+	                  FROM (SELECT ProdutoID,
+				                   SUM(Quantidade) AS Total
+			                  FROM ItensPedidos IPE
+			                 INNER JOIN Pedidos PE ON PE.ID = IPE.PedidoID
+			                 INNER JOIN PedidosStatus PS ON PS.ID = PE.StatusID
+			                 WHERE PS.Nome IN('Em Fila', 'Processando', 'Finalizado')
+			                 GROUP BY ProdutoID) AS A;
+
+	                SELECT P.ID,
+	                	   P.Nome,
+	                	   P.Descricao,
+	                	   P.Valor,
+	                	   P.CategoriaID,
+	                	   P.Imagem
+	                  FROM dbo.Produtos P
+	                 INNER JOIN #Ranking R ON P.ID = R.ProdutoID
+	                 ORDER BY R.Posicao;", null);
         }
     }
 }
