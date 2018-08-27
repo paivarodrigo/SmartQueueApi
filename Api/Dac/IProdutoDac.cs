@@ -1,4 +1,5 @@
 ﻿using Api.Models;
+using System;
 using System.Collections.Generic;
 
 namespace Api.Dac
@@ -14,5 +15,7 @@ namespace Api.Dac
         IEnumerable<Produto> ConsultarRanking();
 
         string BuscarPorContaId(int contaId);
+
+        IEnumerable<Tuple<int, string>> ListarPedidosPendentes();
     }
 }

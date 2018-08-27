@@ -14,12 +14,10 @@
         // Produtos
         public const int Produtos = 2000;
         public const int ProdutosBuscarPorId = 2001;
-        public const int ProdutosConsultarCardapio = 2002;
-        public const int ProdutosConsultarRanking = 2003;
-
-        // Categorias
-        public const int Categorias = 3000;
-        public const int CategoriasListar = 3001;
+        public const int ProdutosListar = 2002;
+        public const int ProdutosListarCategorias = 2003;
+        public const int ProdutosConsultarRanking = 2004;
+        public const int ProdutosListarPedidosPendentes = 2005;
 
         // Reservas
         public const int Reservas = 4000;
@@ -33,6 +31,9 @@
         public const int Contas = 5000;
         public const int ContasConsultarConta = 5001;
         public const int ContasRealizarPedido = 5002;
-        public const int ContasEncerrarPedido = 5003;
+        public const int ContasCancelarPedido = 5003;
+        public const int ContasFecharConta = 5004;
+        public const int ContasProcessarPedido = 5005;
+        public const int ContasFinalizarPedido = 5006;
     }
 }

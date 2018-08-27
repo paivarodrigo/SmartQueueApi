@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using Api.Models;
 using Dapper;
@@ -98,6 +99,27 @@ namespace Api.Dac
 	                  FROM dbo.Produtos P
 	                 INNER JOIN #Ranking R ON P.ID = R.ProdutoID
 	                 ORDER BY R.Posicao;", null);
+        }
+
+        public IEnumerable<Tuple<int, string>> ListarPedidosPendentes()
+        {
+            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+                return con.Query<Tuple<int, string>>(@"
+                    SELECT PED.ID AS Item1
+	                     , SUBSTRING(
+		                    (
+		   	                    SELECT ', ' + PR.Nome + ' x ' + CONVERT(VARCHAR, SUM(IPE.Quantidade))
+		   	                      FROM Contas C
+		   	                     INNER JOIN Pedidos PE ON PE.ContaID = C.ID
+		   	                     INNER JOIN ItensPedidos IPE ON IPE.PedidoID = PE.ID
+		   	                     INNER JOIN Produtos PR ON PR.ID = IPE.ProdutoID
+		   	                     WHERE PE.ID = PED.ID
+		   	                     GROUP BY PR.Nome, PR.Valor
+		   	                       FOR XML PATH('')
+		                    ), 3, 100000) AS Item2
+	                  FROM Pedidos PED
+	                 INNER JOIN PedidosStatus PS ON PS.ID = PED.StatusID
+	                 WHERE PS.Nome IN ('Em Fila', 'Processando', 'Finalizado');");
         }
     }
 }

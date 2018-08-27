@@ -80,20 +80,77 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        [Route("EncerrarPedido")]
-        public IActionResult EncerrarPedido([FromBody] int pedidoId)
+        [Route("CancelarPedido/{pedidoId}")]
+        public IActionResult CancelarPedido(int pedidoId)
         {
             try
             {
-                bool pedidoEncerrado = _contaDac.EncerrarPedido(pedidoId);
-                if (!pedidoEncerrado)
-                    return NotFound("Este pedido não existe ou já foi encerrado.");
+                bool pedidoCancelado = _contaDac.CancelarPedido(pedidoId);
+                if (!pedidoCancelado)
+                    return NotFound("Este pedido não existe ou já foi cancelado.");
 
-                return Ok("Pedido encerrado com sucesso.");
+                return Ok("Pedido cancelado com sucesso.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventosLog.ContasEncerrarPedido, ex, ex.Message);
+                _logger.LogError(EventosLog.ContasCancelarPedido, ex, ex.Message);
+                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+            }
+        }
+
+        [HttpPost]
+        [Route("ProcessarPedido/{pedidoId}")]
+        public IActionResult ProcessarPedido(int pedidoId)
+        {
+            try
+            {
+                bool pedidoProcessando = _contaDac.ProcessarPedido(pedidoId);
+                if (!pedidoProcessando)
+                    return NotFound("Este pedido não existe ou já foi processado.");
+
+                return Ok("O pedido está sendo processado.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventosLog.ContasProcessarPedido, ex, ex.Message);
+                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+            }
+        }
+
+        [HttpPost]
+        [Route("FinalizarPedido/{pedidoId}")]
+        public IActionResult FinalizarPedido(int pedidoId)
+        {
+            try
+            {
+                bool pedidoFinalizado = _contaDac.FinalizarPedido(pedidoId);
+                if (!pedidoFinalizado)
+                    return NotFound("Este pedido não existe ou já foi finalizado.");
+
+                return Ok("O pedido foi finalizado com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventosLog.ContasFinalizarPedido, ex, ex.Message);
+                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+            }
+        }
+
+        [HttpPost]
+        [Route("FecharConta/{reservaId}")]
+        public IActionResult FecharConta(int reservaId)
+        {
+            try
+            {
+                Conta conta = _contaDac.FecharConta(reservaId);
+                if (conta == null)
+                    return NotFound("Não há uma conta em aberto.");
+
+                return Ok(conta);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventosLog.ContasFecharConta, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }

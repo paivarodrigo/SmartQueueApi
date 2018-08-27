@@ -9,6 +9,12 @@ namespace Api.Dac
 
         Pedido AdicionarPedido(int contaId, IEnumerable<ItemPedido> itensPedido);
 
-        bool EncerrarPedido(int pedidoId);
+        bool CancelarPedido(int pedidoId);
+
+        bool ProcessarPedido(int pedidoId);
+
+        bool FinalizarPedido(int pedidoId);
+
+        Conta FecharConta(int reservaId);
     }
 }

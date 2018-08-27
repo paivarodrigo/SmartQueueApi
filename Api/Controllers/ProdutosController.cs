@@ -42,8 +42,8 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        [Route("ConsultarCardapio")]
-        public IActionResult ConsultarCardapio()
+        [Route("ListarCategorias")]
+        public IActionResult ListarCategorias()
         {
             try
             {
@@ -52,16 +52,31 @@ namespace Api.Controllers
                 if (categorias == null)
                     return NotFound("Não há categorias para listar.");
 
+                return Ok(new { Categorias = categorias });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventosLog.ProdutosListarCategorias, ex, ex.Message);
+                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+            }
+        }
+
+        [HttpGet]
+        [Route("ListarProdutos")]
+        public IActionResult ListarProdutos()
+        {
+            try
+            {
                 // Busca lista de produtos
                 IEnumerable<Produto> produtos = _produtoDac.ListarProdutos();
                 if (produtos == null)
                     return NotFound("Não há produtos para listar.");
 
-                return Ok(new { Categorias = categorias, Produtos = produtos });
+                return Ok(new { Produtos = produtos });
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventosLog.ProdutosConsultarCardapio, ex, ex.Message);
+                _logger.LogError(EventosLog.ProdutosListar, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
@@ -81,6 +96,23 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ProdutosConsultarRanking, ex, ex.Message);
+                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+            }
+        }
+
+        [HttpGet]
+        [Route("ListarPedidosPendentes")]
+        public IActionResult ListarPedidosPendentes()
+        {
+            try
+            {
+                IEnumerable<Tuple<int, string>> pedidosPendentes = _produtoDac.ListarPedidosPendentes();
+
+                return Ok(pedidosPendentes);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventosLog.ProdutosListarPedidosPendentes, ex, ex.Message);
                 return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
             }
         }
