@@ -4,7 +4,6 @@ using Api.Dac;
 using Api.Models;
 using Api.Utils;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace Api.Controllers
 {
@@ -13,9 +12,9 @@ namespace Api.Controllers
     public class ProdutosController : Controller
     {
         private readonly IProdutoDac _produtoDac;
-        private readonly ILogger _logger;
+        private readonly ILoggerDac _logger;
 
-        public ProdutosController(IProdutoDac produtoDac, ILogger<ProdutosController> logger)
+        public ProdutosController(IProdutoDac produtoDac, ILoggerDac logger)
         {
             _produtoDac = produtoDac;
             _logger = logger;
@@ -52,7 +51,7 @@ namespace Api.Controllers
                 if (categorias == null)
                     return NotFound("Não há categorias para listar.");
 
-                return Ok(new { Categorias = categorias });
+                return Ok(categorias);
             }
             catch (Exception ex)
             {
@@ -72,7 +71,7 @@ namespace Api.Controllers
                 if (produtos == null)
                     return NotFound("Não há produtos para listar.");
 
-                return Ok(new { Produtos = produtos });
+                return Ok(produtos);
             }
             catch (Exception ex)
             {

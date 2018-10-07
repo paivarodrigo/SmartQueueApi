@@ -14,10 +14,10 @@ namespace Api.Dac
             Configuration = configuration;
         }
 
-        public void CadastrarCliente(Usuario usuario)
+        public int CadastrarCliente(Usuario usuario)
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                con.ExecuteScalar<int>(@"
+                return con.ExecuteScalar<int>(@"
                     INSERT INTO dbo.Usuarios (Nome, Sobrenome, DataNascimento, CPF, Email, CidadeNatal, Senha)
 	                VALUES (@Nome, @Sobrenome, @DataNascimento, @Cpf, @Email, @CidadeNatal, @Senha);
 

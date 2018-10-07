@@ -4,7 +4,6 @@ using Api.Dac;
 using Api.Models;
 using Api.Utils;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace Api.Controllers
 {
@@ -14,9 +13,9 @@ namespace Api.Controllers
     {
         private readonly IReservaDac _reservaDac;
         private readonly IProdutoDac _produtoDac;
-        private readonly ILogger _logger;
+        private readonly ILoggerDac _logger;
 
-        public ReservasController(IReservaDac reservaDac, IProdutoDac produtoDac, ILogger<ReservasController> logger)
+        public ReservasController(IReservaDac reservaDac, IProdutoDac produtoDac, ILoggerDac logger)
         {
             _reservaDac = reservaDac;
             _produtoDac = produtoDac;

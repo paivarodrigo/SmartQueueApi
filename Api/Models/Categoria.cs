@@ -4,8 +4,6 @@
     {
         public int Id { get; set; }
 
-        public string Caracteristica { get; set; }
-
-        public string Tamanho { get; set; }
+        public string Nome { get; set; }
     }
 }

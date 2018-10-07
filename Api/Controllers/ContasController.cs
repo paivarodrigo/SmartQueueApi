@@ -2,7 +2,6 @@
 using Api.Models;
 using Api.Utils;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -15,9 +14,9 @@ namespace Api.Controllers
     public class ContasController : Controller
     {
         private readonly IContaDac _contaDac;
-        private readonly ILogger _logger;
+        private readonly ILoggerDac _logger;
 
-        public ContasController(IContaDac contaDac, ILogger<ContasController> logger)
+        public ContasController(IContaDac contaDac, ILoggerDac logger)
         {
             _contaDac = contaDac;
             _logger = logger;

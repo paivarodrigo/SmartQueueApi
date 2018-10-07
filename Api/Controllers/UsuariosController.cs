@@ -3,7 +3,6 @@ using Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Api.Utils;
-using Microsoft.Extensions.Logging;
 
 namespace Api.Controllers
 {
@@ -12,9 +11,9 @@ namespace Api.Controllers
     public class UsuariosController : Controller
     {
         private readonly IUsuarioDac _usuarioDac;
-        private readonly ILogger _logger;
+        private readonly ILoggerDac _logger;
 
-        public UsuariosController(IUsuarioDac usuarioDac, ILogger<UsuariosController> logger)
+        public UsuariosController(IUsuarioDac usuarioDac, ILoggerDac logger)
         {
             _usuarioDac = usuarioDac;
             _logger = logger;
@@ -40,8 +39,8 @@ namespace Api.Controllers
                 // Criptografa a senha
                 usuario.Senha = Gerador.HashMd5(usuario.Senha);
 
-                _usuarioDac.CadastrarCliente(usuario);
-                return Ok();
+                usuario.Id = _usuarioDac.CadastrarCliente(usuario);
+                return Ok(usuario);
             }
             catch (Exception ex)
             {
