@@ -44,7 +44,7 @@ namespace Api.Dac
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
                 return con.QueryFirst<int>(@"
                     IF EXISTS (SELECT 1 FROM Pedidos WHERE ID = @PedidoID
-                                AND StatusID IN (SELECT ID FROM PedidosStatus WHERE Nome IN ('Em Fila', 'Processando')))
+                                AND StatusID IN (SELECT ID FROM PedidosStatus WHERE Nome IN ('Pendente')))
                     BEGIN
                         DECLARE @StatusID INT = (SELECT TOP 1 ID
                                                    FROM PedidosStatus
@@ -66,33 +66,33 @@ namespace Api.Dac
                 return con.QueryFirstOrDefault<Conta>("Contas.FecharConta", new { ReservaID = reservaId }, commandType: CommandType.StoredProcedure);
         }
 
-        public bool ProcessarPedido(int pedidoId)
-        {
-            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                return con.QueryFirst(@"
-                    IF EXISTS (SELECT 1 FROM Pedidos WHERE ID = @PedidoID
-                                AND StatusID IN (SELECT ID FROM PedidosStatus WHERE Nome = 'Em Fila'))
-                    BEGIN
-                        DECLARE @StatusID INT = (SELECT TOP 1 ID
-                                                   FROM PedidosStatus
-                                                  WHERE Nome = 'Processando');
+        //public bool ProcessarPedido(int pedidoId)
+        //{
+        //    using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+        //        return con.QueryFirst(@"
+        //            IF EXISTS (SELECT 1 FROM Pedidos WHERE ID = @PedidoID
+        //                        AND StatusID IN (SELECT ID FROM PedidosStatus WHERE Nome = 'Em Fila'))
+        //            BEGIN
+        //                DECLARE @StatusID INT = (SELECT TOP 1 ID
+        //                                           FROM PedidosStatus
+        //                                          WHERE Nome = 'Processando');
                         
-                        UPDATE Pedidos SET StatusID = @StatusID WHERE ID = @PedidoID;
+        //                UPDATE Pedidos SET StatusID = @StatusID WHERE ID = @PedidoID;
 
-                        SELECT 1;
-                    END
-                    ELSE
-                    BEGIN
-                        SELECT 0;
-                    END", new { PedidoID = pedidoId });
-        }
+        //                SELECT 1;
+        //            END
+        //            ELSE
+        //            BEGIN
+        //                SELECT 0;
+        //            END", new { PedidoID = pedidoId });
+        //}
 
         public bool FinalizarPedido(int pedidoId)
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
                 return con.QueryFirst(@"
                     IF EXISTS (SELECT 1 FROM Pedidos WHERE ID = @PedidoID
-                                AND StatusID IN (SELECT ID FROM PedidosStatus WHERE Nome = 'Processando'))
+                                AND StatusID IN (SELECT ID FROM PedidosStatus WHERE Nome = 'Pendente'))
                     BEGIN
                         DECLARE @StatusID INT = (SELECT TOP 1 ID
                                                    FROM PedidosStatus

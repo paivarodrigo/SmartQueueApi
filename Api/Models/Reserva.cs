@@ -14,12 +14,6 @@ namespace Api.Models
 
         public int QuantidadePessoas { get; set; }
 
-        public string SenhaCheckIn { get; set; }
-
-        public DateTime DataCheckIn { get; set; }
-
-        public DateTime DataCheckOut { get; set; }
-
         public TimeSpan TempoDeEspera { get; set; }
 
         public string Status { get; set; }

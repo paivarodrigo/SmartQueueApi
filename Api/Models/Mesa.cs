@@ -4,9 +4,9 @@
     {
         public int Id { get; set; }
 
-        public string Descricao { get; set; }
-
         public int Numero { get; set; }
+
+        public string Senha { get; set; }
 
         public int QuantidadeAssentos { get; set; }
 

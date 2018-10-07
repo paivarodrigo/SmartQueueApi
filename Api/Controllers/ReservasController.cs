@@ -50,7 +50,7 @@ namespace Api.Controllers
                 if (reserva == null)
                     return BadRequest("Não foi possível solicitar a reserva.");
 
-                reserva.SenhaCheckIn = Gerador.GerarSenhaDaReserva();
+                //reserva.SenhaCheckIn = Gerador.GerarSenhaDaReserva();
                 reserva = _reservaDac.SolicitarReserva(reserva);
                 if (reserva == null)
                     return BadRequest("Já existe uma reserva na fila ou ativa.");
@@ -66,14 +66,14 @@ namespace Api.Controllers
 
         [HttpPost]
         [Route("AtivarReserva/{numeroDaMesa}")]
-        public IActionResult AtivarReserva([FromBody] Reserva reserva, int numeroDaMesa)
+        public IActionResult AtivarReserva([FromBody] Reserva reserva, string senhaDaMesa)
         {
             try
             {
                 if (reserva == null)
                     return BadRequest("Não foi possível ativar a reserva.");
 
-                Conta conta = _reservaDac.AtivarReserva(reserva, numeroDaMesa);
+                Conta conta = _reservaDac.AtivarReserva(reserva, senhaDaMesa);
                 if (conta == null)
                     return BadRequest("Não foi possível ativar a reserva.");
 
@@ -109,10 +109,10 @@ namespace Api.Controllers
         {
             try
             {
-                if (reserva == null || String.IsNullOrWhiteSpace(reserva.SenhaCheckIn))
+                if (reserva == null || String.IsNullOrWhiteSpace(reserva.Status))
                     return BadRequest("Não foi possível cancelar a reserva.");
 
-                int reservaID = _reservaDac.BuscarReservaIDPorSenha(reserva.UsuarioId, reserva.SenhaCheckIn);
+                int reservaID = _reservaDac.BuscarReservaIDPorStatus(reserva.UsuarioId, reserva.Status);
 
                 if (reservaID == 0)
                     return NotFound("A reserva não foi encontrada.");

@@ -16,11 +16,11 @@ namespace Api.Dac
             Configuration = configuration;
         }
 
-        public Conta AtivarReserva(Reserva reserva, int numeroDaMesa)
+        public Conta AtivarReserva(Reserva reserva, string senhaDaMesa)
         {
             DynamicParameters parametros = new DynamicParameters();
-            parametros.Add("SenhaDaReserva", reserva.SenhaCheckIn);
-            parametros.Add("NumeroDaMesa", numeroDaMesa);
+            parametros.Add("SenhaDaReserva",senhaDaMesa);
+            parametros.Add("NumeroDaMesa", reserva.MesaId);
 
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
                 return con.QueryFirstOrDefault<Conta>("Reservas.AtivarReserva", parametros, commandType: CommandType.StoredProcedure);
@@ -57,15 +57,15 @@ namespace Api.Dac
                 return con.Query<Historico>("Reservas.BuscarHistorico", parametros, commandType: CommandType.StoredProcedure);
         }
 
-        public int BuscarReservaIDPorSenha(int usuarioId, string senhaCheckIn)
+        public int BuscarReservaIDPorStatus(int usuarioId, string reservaStatus)
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
                 return con.QueryFirstOrDefault<int>(@"
-                    SELECT TOP 1 ID
-	                  FROM Reservas
-	                 WHERE UsuarioID = @UsuarioID
-	                   AND SenhaCheckin = @SenhaCheckin
-	                 ORDER BY ID DESC;", new { UsuarioID = usuarioId, SenhaCheckin = senhaCheckIn });
+                    SELECT TOP 1 r.ID FROM Reservas r
+                    INNER JOIN ReservasStatus rs ON rs.ID = r.StatusID
+                    WHERE r.UsuarioID = @UsuarioID
+                    AND r.StatusID = @StatusID
+                    ORDER BY r.ID DESC;", new { UsuarioID = usuarioId, StatusID = reservaStatus });
         }
 
         public Reserva BuscarUltimaFinalizadaDoUsuario(int usuarioId)
@@ -77,9 +77,6 @@ namespace Api.Dac
 		                   R.MesaID,
 		                   R.DataReserva,
 		                   R.QuantidadePessoas,
-		                   R.SenhaCheckin,
-		                   R.DataCheckIn,
-		                   R.DataCheckOut,
 		                   R.TempoDeEspera,
 		                   RS.Nome AS Status
 	                  FROM Reservas R
@@ -115,17 +112,14 @@ namespace Api.Dac
 	                BEGIN
 	                	DECLARE @StatusID INT = (SELECT ID FROM ReservasStatus WHERE Nome = 'Em Fila');
 
-	                	INSERT INTO Reservas (UsuarioID, MesaID, DataReserva, QuantidadePessoas, SenhaCheckIn, DataCheckIn, DataCheckOut, TempoDeEspera, StatusID)
-	                	VALUES (@UsuarioID, NULL, GETDATE(), @QuantidadePessoas, @SenhaCheckIn, NULL, NULL, @TempoDeEspera, @StatusID);
+	                	INSERT INTO Reservas (UsuarioID, MesaID, DataReserva, QuantidadePessoas, TempoDeEspera, StatusID)
+	                	VALUES (@UsuarioID, NULL, GETDATE(), @QuantidadePessoas, @TempoDeEspera, @StatusID);
 
 	                	SELECT TOP 1 R.ID,
 	                		   R.UsuarioID,
 	                		   R.MesaID,
 	                		   R.DataReserva,
 	                		   R.QuantidadePessoas,
-	                		   R.SenhaCheckIn,
-	                		   R.DataCheckIn,
-	                		   R.DataCheckOut,
 	                		   R.TempoDeEspera,
 	                		   RS.Nome AS Status
 	                	  FROM Reservas R

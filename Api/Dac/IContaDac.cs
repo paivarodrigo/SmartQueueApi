@@ -11,7 +11,7 @@ namespace Api.Dac
 
         bool CancelarPedido(int pedidoId);
 
-        bool ProcessarPedido(int pedidoId);
+        //bool ProcessarPedido(int pedidoId);
 
         bool FinalizarPedido(int pedidoId);
 

@@ -13,9 +13,9 @@ namespace Api.Dac
 
         Reserva SolicitarReserva(Reserva reserva);
 
-        Conta AtivarReserva(Reserva reserva, int numeroDaMesa);
+        Conta AtivarReserva(Reserva reserva, string senhaDaMesa);
 
-        int BuscarReservaIDPorSenha(int usuarioId, string senhaCheckIn);
+        int BuscarReservaIDPorStatus(int usuarioId, string reservaStatus);
 
         bool CancelarReserva(int reservaID);
     }

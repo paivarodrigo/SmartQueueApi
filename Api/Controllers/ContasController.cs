@@ -97,24 +97,24 @@ namespace Api.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("ProcessarPedido/{pedidoId}")]
-        public IActionResult ProcessarPedido(int pedidoId)
-        {
-            try
-            {
-                bool pedidoProcessando = _contaDac.ProcessarPedido(pedidoId);
-                if (!pedidoProcessando)
-                    return NotFound("Este pedido não existe ou já foi processado.");
+        //[HttpPost]
+        //[Route("ProcessarPedido/{pedidoId}")]
+        //public IActionResult ProcessarPedido(int pedidoId)
+        //{
+        //    try
+        //    {
+        //        bool pedidoProcessando = _contaDac.ProcessarPedido(pedidoId);
+        //        if (!pedidoProcessando)
+        //            return NotFound("Este pedido não existe ou já foi processado.");
 
-                return Ok("O pedido está sendo processado.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(EventosLog.ContasProcessarPedido, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
-            }
-        }
+        //        return Ok("O pedido está sendo processado.");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(EventosLog.ContasProcessarPedido, ex, ex.Message);
+        //        return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+        //    }
+        //}
 
         [HttpPost]
         [Route("FinalizarPedido/{pedidoId}")]

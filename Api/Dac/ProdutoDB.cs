@@ -57,8 +57,7 @@ namespace Api.Dac
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
                 return con.Query<Categoria>(@"
                     SELECT ID,
-		                   Caracteristica,
-		                   Tamanho
+		                   Nome
 	                  FROM Categorias;", null);
         }
 
@@ -87,7 +86,7 @@ namespace Api.Dac
 			                  FROM ItensPedidos IPE
 			                 INNER JOIN Pedidos PE ON PE.ID = IPE.PedidoID
 			                 INNER JOIN PedidosStatus PS ON PS.ID = PE.StatusID
-			                 WHERE PS.Nome IN('Em Fila', 'Processando', 'Finalizado')
+			                 WHERE PS.Nome IN('Finalizado')
 			                 GROUP BY ProdutoID) AS A;
 
 	                SELECT P.ID,
@@ -119,7 +118,7 @@ namespace Api.Dac
 		                    ), 3, 100000) AS Item2
 	                  FROM Pedidos PED
 	                 INNER JOIN PedidosStatus PS ON PS.ID = PED.StatusID
-	                 WHERE PS.Nome IN ('Em Fila', 'Processando', 'Finalizado');");
+	                 WHERE PS.Nome IN ('Pendente');");
         }
     }
 }
