@@ -42,29 +42,15 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        [Route("RealizarPedido")]
-        public IActionResult RealizarPedido([FromBody] JObject jObject)
+        [Route("RealizarPedido/{id}")]
+        public IActionResult RealizarPedido([FromBody] IEnumerable<ItemPedido> itensPedido, int id)
         {
             try
             {
-                if (jObject == null)
+                if (itensPedido == null || !itensPedido.Any() || id == 0)
                     return BadRequest("Não foi possível fazer o pedido.");
 
-                Conta conta = jObject["conta"]?.ToObject<Conta>();
-                IEnumerable<Produto> produtos = jObject["produtos"]?.ToObject<IEnumerable<Produto>>();
-
-                if (conta == null || conta.Id == 0 || produtos == null || !produtos.Any())
-                    return BadRequest("Não foi possível fazer o pedido.");
-
-                IEnumerable<ItemPedido> itensPedido = produtos
-                    .GroupBy(x => x.Id)
-                    .Select(produto => new ItemPedido()
-                    {
-                        ProdutoId = produto.Key,
-                        Quantidade = produto.Count()
-                    });
-
-                Pedido pedido = _contaDac.AdicionarPedido(conta.Id, itensPedido);
+                Pedido pedido = _contaDac.AdicionarPedido(id, itensPedido);
 
                 if (pedido == null)
                     return BadRequest("Não foi possível fazer o pedido.");
