@@ -61,11 +61,11 @@ namespace Api.Dac
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
                 return con.QueryFirstOrDefault<int>(@"
-                    SELECT TOP 1 r.ID FROM Reservas r
-                    INNER JOIN ReservasStatus rs ON rs.ID = r.StatusID
-                    WHERE r.UsuarioID = @UsuarioID
-                    AND r.StatusID = @StatusID
-                    ORDER BY r.ID DESC;", new { UsuarioID = usuarioId, StatusID = reservaStatus });
+                    SELECT TOP 1 R.ID FROM Reservas R
+                    INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID
+                    WHERE R.UsuarioID = @UsuarioID
+                    AND RS.Nome = @Status
+                    ORDER BY R.ID DESC;", new { UsuarioID = usuarioId, Status = reservaStatus });
         }
 
         public Reserva BuscarUltimaFinalizadaDoUsuario(int usuarioId)
