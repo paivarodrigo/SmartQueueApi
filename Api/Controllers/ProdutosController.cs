@@ -21,8 +21,8 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        [Route("BuscarPorId/{id}")]
-        public IActionResult BuscarPorId(int id)
+        [Route("ConsultarProduto/{id}")]
+        public IActionResult ConsultarProduto(int id)
         {
             try
             {

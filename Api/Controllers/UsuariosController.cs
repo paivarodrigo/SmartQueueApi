@@ -1,8 +1,8 @@
 ﻿using Api.Dac;
 using Api.Models;
+using Api.Utils;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using Api.Utils;
 
 namespace Api.Controllers
 {
@@ -26,15 +26,21 @@ namespace Api.Controllers
             try
             {
                 if (usuario == null)
+                {
                     return BadRequest("Entradas inválidas para cadastro de usuário.");
+                }
 
                 Usuario _usuario = _usuarioDac.BuscarPorCPF(usuario.Cpf);
                 if (_usuario != null)
+                {
                     return BadRequest("Este CPF já está cadastrado.");
+                }
 
                 _usuario = _usuarioDac.BuscarPorEmail(usuario.Email);
                 if (_usuario != null)
+                {
                     return BadRequest("Este email já está cadastrado.");
+                }
 
                 // Criptografa a senha
                 usuario.Senha = Gerador.HashMd5(usuario.Senha);
@@ -56,17 +62,23 @@ namespace Api.Controllers
             try
             {
                 if (usuario == null || usuario.Email == null || usuario.Senha == null)
+                {
                     return BadRequest("Email e/ou senha estão incorretos.");
+                }
 
                 Usuario _usuario = _usuarioDac.BuscarPorEmail(usuario.Email);
                 if (_usuario == null)
+                {
                     return BadRequest("Email e/ou senha estão incorretos.");
+                }
 
                 // Criptografa a senha
                 usuario.Senha = Gerador.HashMd5(usuario.Senha);
 
                 if (usuario.Senha != _usuario.Senha)
+                {
                     return BadRequest("Email e/ou senha estão incorretos.");
+                }
 
                 return Ok(_usuario);
             }
@@ -77,6 +89,7 @@ namespace Api.Controllers
             }
         }
 
+        [Obsolete]
         [HttpPost]
         [Route("RecuperarSenhaPorCpf/{cpf}")]
         public IActionResult RecuperarSenhaPorCpf(string cpf)
@@ -84,11 +97,15 @@ namespace Api.Controllers
             try
             {
                 if (string.IsNullOrWhiteSpace(cpf))
+                {
                     return BadRequest("O CPF não pode ser nulo.");
+                }
 
                 Usuario usuario = _usuarioDac.BuscarPorCPF(cpf);
                 if (usuario == null)
+                {
                     return NotFound("O usuário não foi encontrado.");
+                }
 
                 usuario.Senha = Gerador.GerarSenhaUsuario();
                 Email.EnviarNovaSenha(usuario.Email, usuario.Nome + " " + usuario.Sobrenome, usuario.Senha);
@@ -113,11 +130,15 @@ namespace Api.Controllers
             try
             {
                 if (string.IsNullOrWhiteSpace(email))
+                {
                     return BadRequest("O email não pode ser nulo.");
+                }
 
                 Usuario usuario = _usuarioDac.BuscarPorEmail(email);
                 if (usuario == null)
+                {
                     return NotFound("O usuário não foi encontrado.");
+                }
 
                 usuario.Senha = Gerador.GerarSenhaUsuario();
                 Email.EnviarNovaSenha(usuario.Email, usuario.Nome + " " + usuario.Sobrenome, usuario.Senha);
@@ -142,15 +163,21 @@ namespace Api.Controllers
             try
             {
                 if (model == null || model.UsuarioAtual == null || model.NovaSenha == null)
+                {
                     return BadRequest("Entradas inválidas.");
+                }
 
                 Usuario _usuario = _usuarioDac.BuscarPorId(model.UsuarioAtual.Id);
                 if (_usuario == null)
+                {
                     return NotFound("O usuário não foi encontrado.");
+                }
 
                 // Validar senha atual criptografada
                 if (model.UsuarioAtual.Senha != _usuario.Senha)
+                {
                     return BadRequest("Falha de autenticação.");
+                }
 
                 // Criptografa a nova senha
                 model.NovaSenha = Gerador.HashMd5(model.NovaSenha);

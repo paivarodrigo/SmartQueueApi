@@ -1,4 +1,5 @@
 ﻿using Api.Dac;
+using Api.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +24,8 @@ namespace Api
             services.AddTransient<IProdutoDac, ProdutoDB>();
             services.AddTransient<IReservaDac, ReservaDB>();
             services.AddTransient<IUsuarioDac, UsuarioDB>();
+            services.AddTransient<IEstudoDac, EstudoDB>();
+            services.AddTransient<IClient, Client>();
             services.AddMvc();
             services.AddCors();
         }

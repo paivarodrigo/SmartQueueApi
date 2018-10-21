@@ -14,10 +14,21 @@ namespace Api.Dac
             Configuration = configuration;
         }
 
-        public void LogError(int eventoId, Exception exception, string message)
+        public void LogError(int eventoId, Exception excecao, string mensagem)
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                con.Execute("INSERT INTO Logs VALUES (@Level, @Evento, @Exception, @Message, GETDATE())", new { Level = "Erro", Evento = eventoId, Exception = exception.ToString(), Message = message });
+            {
+                con.Execute(@"
+                    INSERT INTO Logs (Nivel, Evento, Excecao, Mensagem, Data)
+                    VALUES (@Nivel, @Evento, @Excecao, @Mensagem, GETDATE() - '03:00:00')",
+                    new
+                    {
+                        Nivel = "Erro",
+                        Evento = eventoId,
+                        Excecao = excecao.ToString(),
+                        Mensagem = mensagem
+                    });
+            }
         }
     }
 }

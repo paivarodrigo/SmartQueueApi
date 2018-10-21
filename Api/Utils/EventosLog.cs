@@ -35,5 +35,9 @@
         public const int ContasFecharConta = 5004;
         public const int ContasProcessarPedido = 5005;
         public const int ContasFinalizarPedido = 5006;
+
+        // Estudos
+        public const int EstudosBuscarDadosTreinoIA = 6000;
+        public const int EstudosBuscarDadosExecucao = 6001;
     }
 }

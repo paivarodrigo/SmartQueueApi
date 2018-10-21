@@ -14,7 +14,7 @@ namespace Api.Models
 
         public int QuantidadePessoas { get; set; }
 
-        public TimeSpan TempoDeEspera { get; set; }
+        public int MinutosDeEspera { get; set; }
 
         public string Status { get; set; }
     }

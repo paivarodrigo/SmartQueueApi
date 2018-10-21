@@ -2,7 +2,6 @@
 using Api.Models;
 using Api.Utils;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +29,9 @@ namespace Api.Controllers
             {
                 Historico historicoDeHoje = _contaDac.ConsultarPorReservaId(reservaId);
                 if (historicoDeHoje == null)
-                    return NotFound("Não há uma conta em aberto.");
+                {
+                    return Ok(new Historico() { Valor = 0, Pedidos = string.Empty });
+                }
 
                 return Ok(historicoDeHoje);
             }
@@ -48,12 +49,16 @@ namespace Api.Controllers
             try
             {
                 if (itensPedido == null || !itensPedido.Any() || id == 0)
+                {
                     return BadRequest("Não foi possível fazer o pedido.");
+                }
 
                 Pedido pedido = _contaDac.AdicionarPedido(id, itensPedido);
 
                 if (pedido == null)
+                {
                     return BadRequest("Não foi possível fazer o pedido.");
+                }
 
                 return Ok(pedido);
             }
@@ -72,7 +77,9 @@ namespace Api.Controllers
             {
                 bool pedidoCancelado = _contaDac.CancelarPedido(pedidoId);
                 if (!pedidoCancelado)
+                {
                     return NotFound("Este pedido não existe ou já foi cancelado.");
+                }
 
                 return Ok("Pedido cancelado com sucesso.");
             }
@@ -110,7 +117,9 @@ namespace Api.Controllers
             {
                 bool pedidoFinalizado = _contaDac.FinalizarPedido(pedidoId);
                 if (!pedidoFinalizado)
+                {
                     return NotFound("Este pedido não existe ou já foi finalizado.");
+                }
 
                 return Ok("O pedido foi finalizado com sucesso.");
             }
@@ -129,7 +138,9 @@ namespace Api.Controllers
             {
                 Conta conta = _contaDac.FecharConta(reservaId);
                 if (conta == null)
-                    return NotFound("Não há uma conta em aberto.");
+                {
+                    return Ok(new Conta() { Id = 0 });
+                }
 
                 return Ok(conta);
             }

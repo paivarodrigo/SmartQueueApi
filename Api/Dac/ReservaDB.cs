@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using Api.Models;
+﻿using Api.Models;
 using Dapper;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace Api.Dac
 {
@@ -18,17 +18,22 @@ namespace Api.Dac
 
         public Conta AtivarReserva(Reserva reserva, string senhaDaMesa)
         {
-            DynamicParameters parametros = new DynamicParameters();
-            parametros.Add("SenhaDaReserva",senhaDaMesa);
-            parametros.Add("NumeroDaMesa", reserva.MesaId);
-
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                return con.QueryFirstOrDefault<Conta>("Reservas.AtivarReserva", parametros, commandType: CommandType.StoredProcedure);
+            {
+                return con.QueryFirstOrDefault<Conta>("Reservas.AtivarReserva",
+                    new
+                    {
+                        ReservaID = reserva.Id,
+                        NumeroDaMesa = reserva.MesaId,
+                        SenhaDaMesa = senhaDaMesa
+                    }, commandType: CommandType.StoredProcedure);
+            }
         }
 
         public Conta BuscarConta(int reservaId)
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+            {
                 return con.QueryFirstOrDefault<Conta>(@"
                     SELECT C.ID,
 		                   C.ReservaID,
@@ -45,50 +50,72 @@ namespace Api.Dac
 	                 GROUP BY C.ID,
 		                      C.ReservaID,
 		                      C.DataAbertura,
-		                      C.DataFechamento;", new { ReservaID = reservaId });
+		                      C.DataFechamento;",
+                              new
+                              {
+                                  ReservaID = reservaId
+                              });
+            }
         }
 
         public IEnumerable<Historico> ConsultarHistorico(int usuarioId)
         {
-            DynamicParameters parametros = new DynamicParameters();
-            parametros.Add("UsuarioID", usuarioId);
-
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                return con.Query<Historico>("Reservas.BuscarHistorico", parametros, commandType: CommandType.StoredProcedure);
+            {
+                return con.Query<Historico>("Reservas.BuscarHistorico",
+                    new
+                    {
+                        UsuarioID = usuarioId
+                    }, commandType: CommandType.StoredProcedure);
+            }
         }
 
         public int BuscarReservaIDPorStatus(int usuarioId, string reservaStatus)
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+            {
                 return con.QueryFirstOrDefault<int>(@"
                     SELECT TOP 1 R.ID FROM Reservas R
                     INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID
                     WHERE R.UsuarioID = @UsuarioID
                     AND RS.Nome = @Status
-                    ORDER BY R.ID DESC;", new { UsuarioID = usuarioId, Status = reservaStatus });
+                    ORDER BY R.ID DESC;",
+                    new
+                    {
+                        UsuarioID = usuarioId,
+                        Status = reservaStatus
+                    });
+            }
         }
 
         public Reserva BuscarUltimaFinalizadaDoUsuario(int usuarioId)
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+            {
                 return con.QueryFirstOrDefault<Reserva>(@"
                     SELECT R.ID,
 		                   R.UsuarioID,
 		                   R.MesaID,
 		                   R.DataReserva,
 		                   R.QuantidadePessoas,
-		                   R.TempoDeEspera,
+		                   R.MinutosDeEspera,
 		                   RS.Nome AS Status
 	                  FROM Reservas R
 	                 INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID
 	                 WHERE R.UsuarioID = @UsuarioID
 	                   AND RS.Nome = 'Finalizada'
-	                 ORDER BY ID DESC;", new { UsuarioID = usuarioId });
+	                 ORDER BY ID DESC;",
+                     new
+                     {
+                         UsuarioID = usuarioId
+                     });
+            }
         }
 
         public bool CancelarReserva(int reservaID)
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+            {
                 return con.ExecuteScalar<int>(@"
                     IF EXISTS(SELECT * FROM Reservas R INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID WHERE R.ID = @ReservaID AND RS.Nome = 'Em Fila')
 	                BEGIN
@@ -101,32 +128,93 @@ namespace Api.Dac
 	                ELSE
 	                BEGIN
 	                	SELECT 0;
-	                END", new { ReservaID = reservaID }) == 1;
+	                END",
+                    new
+                    {
+                        ReservaID = reservaID
+                    }) == 1;
+            }
         }
 
-        public Reserva SolicitarReserva(Reserva reserva)
+        public bool VerificarReservaUsuario(int usuarioId)
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
-                return con.QueryFirstOrDefault<Reserva>(@"
-                    IF NOT EXISTS(SELECT TOP 1 R.ID FROM Reservas R INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID WHERE UsuarioID = @UsuarioID AND RS.Nome IN ('Em Fila', 'Em Uso'))
-	                BEGIN
-	                	DECLARE @StatusID INT = (SELECT ID FROM ReservasStatus WHERE Nome = 'Em Fila');
+            {
+                return con.QueryFirst<int>(@"
+                    IF EXISTS(SELECT TOP 1 R.ID FROM Reservas R INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID WHERE UsuarioID = @UsuarioID AND RS.Nome IN ('Em Fila', 'Em Uso'))
+                    BEGIN
+                        SELECT 1;
+                    END
+                    ELSE
+                    BEGIN
+                        SELECT 0;
+                    END",
+                    new { UsuarioID = usuarioId }) == 1;
+            }
+        }
 
-	                	INSERT INTO Reservas (UsuarioID, MesaID, DataReserva, QuantidadePessoas, TempoDeEspera, StatusID)
-	                	VALUES (@UsuarioID, NULL, GETDATE(), @QuantidadePessoas, @TempoDeEspera, @StatusID);
+        public Reserva AdicionarReserva(Reserva reserva)
+        {
+            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+            {
+                return con.QueryFirstOrDefault<Reserva>(@"                    
+	                DECLARE @StatusID INT = (SELECT ID FROM ReservasStatus WHERE Nome = 'Em Fila');
 
-	                	SELECT TOP 1 R.ID,
-	                		   R.UsuarioID,
-	                		   R.MesaID,
-	                		   R.DataReserva,
-	                		   R.QuantidadePessoas,
-	                		   R.TempoDeEspera,
-	                		   RS.Nome AS Status
-	                	  FROM Reservas R
-	                	 INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID
-	                	 WHERE UsuarioID = @UsuarioID
-	                	   AND RS.Nome = 'Em Fila';
-	                END", reserva);
+	                INSERT INTO Reservas (UsuarioID, MesaID, DataReserva, QuantidadePessoas, MinutosDeEspera, StatusID)
+	                VALUES (@UsuarioID, NULL, GETDATE() - '03:00:00', @QuantidadePessoas, @MinutosDeEspera, @StatusID);
+
+	                SELECT TOP 1 R.ID,
+	                	   R.UsuarioID,
+	                	   R.MesaID,
+	                	   R.DataReserva,
+	                	   R.QuantidadePessoas,
+	                	   R.MinutosDeEspera,
+	                	   RS.Nome AS Status
+	                FROM Reservas R
+	                INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID
+	                WHERE UsuarioID = @UsuarioID
+	                AND RS.Nome = 'Em Fila';",
+                    new
+                    {
+                        UsuarioID = reserva.UsuarioId,
+                        QuantidadePessoas = reserva.QuantidadePessoas,
+                        MinutosDeEspera = reserva.MinutosDeEspera
+                    });
+            }
+        }
+
+        public bool VerificarLotacaoMesas()
+        {
+            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+            {
+                return con.QueryFirst<int>(@"
+                    IF((SELECT COUNT(1) FROM Reservas R INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID WHERE RS.Nome IN ('Em Uso')) = 15)
+                    BEGIN
+                        SELECT 1;
+                    END
+                    ELSE
+                    BEGIN
+                        SELECT 0;
+                    END") == 1;
+            }
+        }
+
+        public List<Reserva> BuscarReservasNaFila()
+        {
+            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+            {
+                return con.Query<Reserva>(@"
+                    SELECT R.ID,
+	                	R.UsuarioID,
+	                	R.MesaID,
+	                	R.DataReserva,
+	                	R.QuantidadePessoas,
+	                	R.MinutosDeEspera,
+	                	RS.Nome AS Status
+	                FROM Reservas R
+	                INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID
+	                WHERE RS.Nome = 'Em Fila';").AsList();
+            }
         }
     }
 }
