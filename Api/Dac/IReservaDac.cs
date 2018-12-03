@@ -24,5 +24,9 @@ namespace Api.Dac
         bool VerificarReservaUsuario(int usuarioId);
 
         bool VerificarLotacaoMesas();
+
+        void AtualizarTempos(List<Reserva> reservas);
+
+        int ConsultarTempo(int reservaId);
     }
 }

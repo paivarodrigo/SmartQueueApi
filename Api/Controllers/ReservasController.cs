@@ -4,6 +4,7 @@ using Api.Utils;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Api.Controllers
@@ -42,7 +43,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ReservasConsultarHistorico, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao consultar o histórico.");
             }
         }
 
@@ -65,19 +66,24 @@ namespace Api.Controllers
                 {
                     if (_reservaDac.VerificarLotacaoMesas())
                     {
-                        reserva = _reservaDac.AdicionarReserva(reserva);
                         List<Reserva> reservas = _reservaDac.BuscarReservasNaFila();
+                        reservas.Add(reserva);
                         List<int> tempos = await _client.BuscarTemposPrevistos(reservas.Count);
 
                         int i = 0;
-                        foreach (var res in reservas)
+                        foreach (Reserva res in reservas)
                         {
                             res.MinutosDeEspera = tempos[i++];
                         }
+
+                        reserva = reservas.First(x => x.UsuarioId == reserva.UsuarioId);
+                        reservas.Remove(reserva);
+                        _reservaDac.AtualizarTempos(reservas);
+                        reserva = _reservaDac.AdicionarReserva(reserva);
                     }
                     else
                     {
-                        reserva.MinutosDeEspera = 1; // 1 minuto é o padrão definido para espera quando não há fila
+                        reserva.MinutosDeEspera = 1; // 1 minuto é o tempo padrão definido quando não há fila
                         reserva = _reservaDac.AdicionarReserva(reserva);
                     }
                 }
@@ -87,7 +93,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ReservasSolicitarMesa, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao solicitar a reserva.");
             }
         }
 
@@ -113,7 +119,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ReservasAtivarReserva, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao ativar a reserva.");
             }
         }
 
@@ -145,7 +151,24 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ReservasCancelarMesa, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao cancelar a reserva.");
+            }
+        }
+
+        [HttpGet]
+        [Route("ConsultarTempo/{reservaId}")]
+        public IActionResult ConsultarTempo(int reservaId)
+        {
+            try
+            {
+                int tempo = _reservaDac.ConsultarTempo(reservaId);
+
+                return Ok(tempo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventosLog.ReservasConsultarTempo, ex, ex.Message);
+                return StatusCode(500, "Ops! Um erro ocorreu ao consultar o tempo.");
             }
         }
     }

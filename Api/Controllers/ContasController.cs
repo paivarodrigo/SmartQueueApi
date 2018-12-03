@@ -38,26 +38,26 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ContasConsultarConta, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao consultar a conta.");
             }
         }
 
         [HttpPost]
-        [Route("RealizarPedido/{id}")]
-        public IActionResult RealizarPedido([FromBody] IEnumerable<ItemPedido> itensPedido, int id)
+        [Route("RealizarPedido/{contaId}")]
+        public IActionResult RealizarPedido([FromBody] IEnumerable<ItemPedido> itensPedido, int contaId)
         {
             try
             {
-                if (itensPedido == null || !itensPedido.Any() || id == 0)
+                if (itensPedido == null || !itensPedido.Any() || contaId == 0)
                 {
-                    return BadRequest("Não foi possível fazer o pedido.");
+                    return BadRequest("Ops! Não foi possível realizar o pedido.");
                 }
 
-                Pedido pedido = _contaDac.AdicionarPedido(id, itensPedido);
+                Pedido pedido = _contaDac.AdicionarPedido(contaId, itensPedido);
 
                 if (pedido == null)
                 {
-                    return BadRequest("Não foi possível fazer o pedido.");
+                    return BadRequest("Ops! Não foi possível realizar o pedido.");
                 }
 
                 return Ok(pedido);
@@ -65,7 +65,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ContasRealizarPedido, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao realizar o pedido.");
             }
         }
 
@@ -86,7 +86,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ContasCancelarPedido, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao cancelar o pedido.");
             }
         }
 
@@ -126,7 +126,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ContasFinalizarPedido, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! um erro ocorreu ao finalizar o pedido.");
             }
         }
 
@@ -147,7 +147,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ContasFecharConta, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao fechar a conta.");
             }
         }
     }

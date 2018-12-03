@@ -51,7 +51,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.UsuariosCadastrarCliente, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao cadastrar o cliente.");
             }
         }
 
@@ -85,7 +85,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.UsuariosLogar, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu na tentativa de login.");
             }
         }
 
@@ -119,7 +119,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.UsuariosRecuperarSenhaPorCpf, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao recuperar a senha por CPF.");
             }
         }
 
@@ -152,7 +152,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.UsuariosRecuperarSenhaPorEmail, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao recuperar a senha por email.");
             }
         }
 
@@ -174,7 +174,7 @@ namespace Api.Controllers
                 }
 
                 // Validar senha atual criptografada
-                if (model.UsuarioAtual.Senha != _usuario.Senha)
+                if (Gerador.HashMd5(model.UsuarioAtual.Senha) != _usuario.Senha)
                 {
                     return BadRequest("Falha de autenticação.");
                 }
@@ -189,22 +189,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.UsuariosAlterarSenha, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
-            }
-        }
-
-        [HttpPost]
-        [Route("Sair")]
-        public IActionResult Sair([FromBody] Usuario usuario)
-        {
-            try
-            {
-                return Ok(new Usuario());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(EventosLog.UsuariosSair, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao alterar a senha.");
             }
         }
     }

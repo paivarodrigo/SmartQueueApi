@@ -41,7 +41,7 @@ namespace Api.Dac
             }
         }
 
-        public Produto BuscarPorId(int id)
+        public Produto BuscarPorId(int produtoId)
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
             {
@@ -56,7 +56,7 @@ namespace Api.Dac
 	                 WHERE ID = @ID;",
                      new
                      {
-                         ID = id
+                         ID = produtoId
                      });
             }
         }

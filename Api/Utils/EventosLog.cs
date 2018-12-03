@@ -9,7 +9,6 @@
         public const int UsuariosRecuperarSenhaPorCpf = 1003;
         public const int UsuariosRecuperarSenhaPorEmail = 1004;
         public const int UsuariosAlterarSenha = 1005;
-        public const int UsuariosSair = 1006;
 
         // Produtos
         public const int Produtos = 2000;

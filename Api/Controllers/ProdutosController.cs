@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Api.Dac;
+﻿using Api.Dac;
 using Api.Models;
 using Api.Utils;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 
 namespace Api.Controllers
 {
@@ -21,22 +21,24 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        [Route("ConsultarProduto/{id}")]
-        public IActionResult ConsultarProduto(int id)
+        [Route("ConsultarProduto/{produtoId}")]
+        public IActionResult ConsultarProduto(int produtoId)
         {
             try
             {
-                Produto produto = _produtoDac.BuscarPorId(id);
+                Produto produto = _produtoDac.BuscarPorId(produtoId);
 
                 if (produto == null)
+                {
                     return NotFound("O produto não foi encontrado.");
+                }
 
                 return Ok(produto);
             }
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ProdutosBuscarPorId, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao consultar o produto.");
             }
         }
 
@@ -49,14 +51,16 @@ namespace Api.Controllers
                 // Busca lista de categorias
                 IEnumerable<Categoria> categorias = _produtoDac.ListarCategorias();
                 if (categorias == null)
+                {
                     return NotFound("Não há categorias para listar.");
+                }
 
                 return Ok(categorias);
             }
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ProdutosListarCategorias, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao listar as categorias.");
             }
         }
 
@@ -69,14 +73,16 @@ namespace Api.Controllers
                 // Busca lista de produtos
                 IEnumerable<Produto> produtos = _produtoDac.ListarProdutos();
                 if (produtos == null)
+                {
                     return NotFound("Não há produtos para listar.");
+                }
 
                 return Ok(produtos);
             }
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ProdutosListar, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao listar os produtos.");
             }
         }
 
@@ -88,14 +94,16 @@ namespace Api.Controllers
             {
                 IEnumerable<Produto> produtos = _produtoDac.ConsultarRanking();
                 if (produtos == null)
+                {
                     return NotFound("Não há dados para gerar o ranking.");
+                }
 
                 return Ok(produtos);
             }
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ProdutosConsultarRanking, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao consultar o ranking.");
             }
         }
 
@@ -112,7 +120,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(EventosLog.ProdutosListarPedidosPendentes, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao listar os pedidos pendentes.");
             }
         }
     }

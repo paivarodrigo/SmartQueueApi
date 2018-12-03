@@ -29,7 +29,7 @@ namespace Api.Controllers
                 IEnumerable<DadosTreinoIA> dadosTreinoIAs = _estudoDac.BuscarDadosTreinoIA();
                 if (dadosTreinoIAs == null)
                 {
-                    return BadRequest("Não há dados para treino");
+                    return BadRequest("Não há dados para treino.");
                 }
 
                 return Ok(dadosTreinoIAs);
@@ -37,7 +37,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _loggerDac.LogError(EventosLog.EstudosBuscarDadosTreinoIA, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao buscar os dados de treino da IA.");
             }
         }
 
@@ -50,7 +50,7 @@ namespace Api.Controllers
                 IEnumerable<DadosTreinoIA> dadosTesteIAs = _estudoDac.BuscarDadosTesteIA();
                 if (dadosTesteIAs == null)
                 {
-                    return BadRequest("Não há dados para teste");
+                    return BadRequest("Não há dados para teste.");
                 }
 
                 return Ok(dadosTesteIAs);
@@ -58,7 +58,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _loggerDac.LogError(EventosLog.EstudosBuscarDadosTreinoIA, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao buscar os dados de teste da IA.");
             }
         }
 
@@ -75,7 +75,7 @@ namespace Api.Controllers
             catch (Exception ex)
             {
                 _loggerDac.LogError(EventosLog.EstudosBuscarDadosExecucao, ex, ex.Message);
-                return StatusCode(500, "Erro desconhecido. Por favor, contate o suporte.");
+                return StatusCode(500, "Ops! Um erro ocorreu ao buscar os dados de execução.");
             }
         }
     }

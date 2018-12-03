@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace Api.Dac
 {
@@ -123,6 +124,13 @@ namespace Api.Dac
 	                	   SET StatusID = (SELECT ID FROM ReservasStatus WHERE Nome = 'Cancelada')
 	                	 WHERE ID = @ReservaID;
 
+                        -- LIBERA PRÓXIMA RESERVA NA FILA
+                        IF (SELECT DataDeLiberacao FROM ReservasFila WHERE ReservaID = @ReservaID) IS NOT NULL
+                            EXEC Reservas.LiberarProximaReserva;
+
+                        -- RETIRA RESERVA DA FILA
+                        DELETE FROM ReservasFila WHERE ReservaID = @ReservaID;
+
 	                	SELECT 1;
 	                END
 	                ELSE
@@ -161,19 +169,29 @@ namespace Api.Dac
 	                DECLARE @StatusID INT = (SELECT ID FROM ReservasStatus WHERE Nome = 'Em Fila');
 
 	                INSERT INTO Reservas (UsuarioID, MesaID, DataReserva, QuantidadePessoas, MinutosDeEspera, StatusID)
-	                VALUES (@UsuarioID, NULL, GETDATE() - '03:00:00', @QuantidadePessoas, @MinutosDeEspera, @StatusID);
+	                VALUES (@UsuarioID, NULL, GETDATE() - '02:00:00', @QuantidadePessoas, 0, @StatusID);
 
-	                SELECT TOP 1 R.ID,
+                    DECLARE @ReservaID INT = @@IDENTITY;
+
+                    DECLARE @Posicao INT = (SELECT COUNT(1) + 1 FROM ReservasFila);
+
+                    INSERT INTO ReservasFila (ReservaID, Posicao, MinutosDeEspera, DataDeLiberacao)
+                    VALUES (@ReservaID, @Posicao, @MinutosDeEspera, NULL);
+                    
+                    -- LIBERA PRÓXIMA RESERVA NA FILA
+                    EXEC Reservas.LiberarProximaReserva;                    
+
+	                SELECT R.ID,
 	                	   R.UsuarioID,
 	                	   R.MesaID,
 	                	   R.DataReserva,
 	                	   R.QuantidadePessoas,
-	                	   R.MinutosDeEspera,
+	                	   RF.MinutosDeEspera,
 	                	   RS.Nome AS Status
 	                FROM Reservas R
 	                INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID
-	                WHERE UsuarioID = @UsuarioID
-	                AND RS.Nome = 'Em Fila';",
+                    INNER JOIN ReservasFila RF ON RF.ReservaID = R.ID
+	                WHERE ID = @ReservaID;",
                     new
                     {
                         UsuarioID = reserva.UsuarioId,
@@ -209,11 +227,46 @@ namespace Api.Dac
 	                	R.MesaID,
 	                	R.DataReserva,
 	                	R.QuantidadePessoas,
-	                	R.MinutosDeEspera,
+	                	RF.MinutosDeEspera,
 	                	RS.Nome AS Status
 	                FROM Reservas R
 	                INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID
-	                WHERE RS.Nome = 'Em Fila';").AsList();
+                    INNER JOIN ReservasFila RF ON RF.Reserva = R.ID
+	                WHERE RS.Nome = 'Em Fila'
+                    ORDER BY R.ID;").AsList();
+            }
+        }
+
+        public void AtualizarTempos(List<Reserva> reservas)
+        {
+            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+            {
+                con.Execute(@"
+                    UPDATE ReservasFila 
+                    SET MinutosDeEspera = @Minutos 
+                    WHERE ID = @ReservaID;",
+                    reservas.Select(x => new
+                    {
+                        ReservaID = x.Id,
+                        Minutos = x.MinutosDeEspera
+                    }));
+            }
+        }
+
+        public int ConsultarTempo(int reservaId)
+        {
+            using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
+            {
+                return con.QueryFirstOrDefault<int>(@"
+                    SELECT
+                    CASE
+                        WHEN DataDeLiberacao IS NULL
+                            THEN MinutosDeEspera
+                        ELSE 0
+                    END
+                    FROM ReservasFila
+                    WHERE ReservaID = @ReservaID",
+                    new { ReservaID = reservaId });
             }
         }
     }

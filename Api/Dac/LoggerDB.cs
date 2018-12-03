@@ -20,7 +20,7 @@ namespace Api.Dac
             {
                 con.Execute(@"
                     INSERT INTO Logs (Nivel, Evento, Excecao, Mensagem, Data)
-                    VALUES (@Nivel, @Evento, @Excecao, @Mensagem, GETDATE() - '03:00:00')",
+                    VALUES (@Nivel, @Evento, @Excecao, @Mensagem, GETDATE() - '02:00:00')",
                     new
                     {
                         Nivel = "Erro",

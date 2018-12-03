@@ -10,7 +10,7 @@ namespace Api.Dac
 
         IEnumerable<Produto> ListarProdutos();
 
-        Produto BuscarPorId(int id);
+        Produto BuscarPorId(int produtoId);
 
         IEnumerable<Produto> ConsultarRanking();
 
