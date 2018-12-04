@@ -21,13 +21,22 @@ namespace Api.Dac
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
             {
-                return con.QueryFirstOrDefault<Conta>("Reservas.AtivarReserva",
+                con.Execute("Reservas.AtivarReserva",
                     new
                     {
                         ReservaID = reserva.Id,
                         NumeroDaMesa = reserva.MesaId,
                         SenhaDaMesa = senhaDaMesa
                     }, commandType: CommandType.StoredProcedure);
+
+                return con.QueryFirstOrDefault<Conta>(@"
+        		SELECT ID
+		    	, ReservaID
+			    , DataAbertura
+			    , DataFechamento
+		        FROM Contas
+		        WHERE ReservaID = @ReservaID;",
+                new { ReservaID = reserva.Id });
             }
         }
 
@@ -113,34 +122,25 @@ namespace Api.Dac
             }
         }
 
-        public bool CancelarReserva(int reservaID)
+        public void CancelarReserva(int reservaID)
         {
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
             {
-                return con.ExecuteScalar<int>(@"
-                    IF EXISTS(SELECT * FROM Reservas R INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID WHERE R.ID = @ReservaID AND RS.Nome = 'Em Fila')
-	                BEGIN
-	                	UPDATE Reservas
-	                	   SET StatusID = (SELECT ID FROM ReservasStatus WHERE Nome = 'Cancelada')
-	                	 WHERE ID = @ReservaID;
+                con.Execute(@"
+	            UPDATE Reservas
+	               SET StatusID = (SELECT ID FROM ReservasStatus WHERE Nome = 'Cancelada')
+	             WHERE ID = @ReservaID;
 
-                        -- LIBERA PRÓXIMA RESERVA NA FILA
-                        IF (SELECT DataDeLiberacao FROM ReservasFila WHERE ReservaID = @ReservaID) IS NOT NULL
-                            EXEC Reservas.LiberarProximaReserva;
+                -- LIBERA PRÓXIMA RESERVA NA FILA
+                IF (SELECT DataDeLiberacao FROM ReservasFila WHERE ReservaID = @ReservaID) IS NOT NULL
+                    EXEC Reservas.LiberarProximaReserva;
 
-                        -- RETIRA RESERVA DA FILA
-                        DELETE FROM ReservasFila WHERE ReservaID = @ReservaID;
-
-	                	SELECT 1;
-	                END
-	                ELSE
-	                BEGIN
-	                	SELECT 0;
-	                END",
-                    new
-                    {
-                        ReservaID = reservaID
-                    }) == 1;
+                -- RETIRA RESERVA DA FILA
+                DELETE FROM ReservasFila WHERE ReservaID = @ReservaID;",
+                new
+                {
+                    ReservaID = reservaID
+                });
             }
         }
 
@@ -191,7 +191,7 @@ namespace Api.Dac
 	                FROM Reservas R
 	                INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID
                     INNER JOIN ReservasFila RF ON RF.ReservaID = R.ID
-	                WHERE ID = @ReservaID;",
+	                WHERE R.ID = @ReservaID;",
                     new
                     {
                         UsuarioID = reserva.UsuarioId,

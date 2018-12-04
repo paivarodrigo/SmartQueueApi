@@ -19,7 +19,7 @@ namespace Api.Dac
 
         int BuscarReservaIDPorStatus(int usuarioId, string reservaStatus);
 
-        bool CancelarReserva(int reservaID);
+        void CancelarReserva(int reservaID);
 
         bool VerificarReservaUsuario(int usuarioId);
 

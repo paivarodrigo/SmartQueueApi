@@ -141,10 +141,7 @@ namespace Api.Controllers
                     return NotFound("A reserva não foi encontrada.");
                 }
 
-                if (!_reservaDac.CancelarReserva(reservaID))
-                {
-                    return BadRequest("Esta reserva já foi utilizada ou cancelada.");
-                }
+                _reservaDac.CancelarReserva(reservaID);
 
                 return Ok("A reserva foi cancelada com sucesso.");
             }
