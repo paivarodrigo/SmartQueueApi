@@ -11,8 +11,8 @@ namespace Api.Utils
 
         public async Task<List<int>> BuscarTemposPrevistos(int quantidadeDeTempos)
         {
-            //Uri requestUri = new Uri($"http://sqpythonia.azurewebsites.net/run/{quantidadeDeTempos}");
-            Uri requestUri = new Uri($"http://127.0.0.1:5000/run/{quantidadeDeTempos}");
+            Uri requestUri = new Uri($"http://sqpythonia.azurewebsites.net/run/{quantidadeDeTempos}");
+            //Uri requestUri = new Uri($"http://127.0.0.1:5000/run/{quantidadeDeTempos}");
             HttpClient client = new HttpClient();
             HttpResponseMessage response = await client.GetAsync(requestUri);
 

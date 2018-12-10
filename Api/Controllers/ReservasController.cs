@@ -83,7 +83,7 @@ namespace Api.Controllers
                     }
                     else
                     {
-                        reserva.MinutosDeEspera = 1; // 1 minuto é o tempo padrão definido quando não há fila
+                        reserva.MinutosDeEspera = 0; // Não há fila
                         reserva = _reservaDac.AdicionarReserva(reserva);
                     }
                 }

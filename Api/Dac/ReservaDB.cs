@@ -131,12 +131,18 @@ namespace Api.Dac
 	               SET StatusID = (SELECT ID FROM ReservasStatus WHERE Nome = 'Cancelada')
 	             WHERE ID = @ReservaID;
 
-                -- LIBERA PRÓXIMA RESERVA NA FILA
                 IF (SELECT DataDeLiberacao FROM ReservasFila WHERE ReservaID = @ReservaID) IS NOT NULL
+                BEGIN
+                    -- RETIRA RESERVA DA FILA
+                    DELETE FROM ReservasFila WHERE ReservaID = @ReservaID;
+                    -- LIBERA PRÓXIMA RESERVA NA FILA
                     EXEC Reservas.LiberarProximaReserva;
-
-                -- RETIRA RESERVA DA FILA
-                DELETE FROM ReservasFila WHERE ReservaID = @ReservaID;",
+                END
+                ELSE
+                BEGIN
+                    -- RETIRA RESERVA DA FILA
+                    DELETE FROM ReservasFila WHERE ReservaID = @ReservaID;
+                END;",
                 new
                 {
                     ReservaID = reservaID
@@ -206,13 +212,20 @@ namespace Api.Dac
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
             {
                 return con.QueryFirst<int>(@"
-                    IF((SELECT COUNT(1) FROM Reservas R INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID WHERE RS.Nome IN ('Em Uso')) = 15)
+                    DECLARE @ReservasAtivasELiberadas INT =   
+                        (SELECT COUNT(1) FROM Reservas WHERE StatusID = 
+                            (SELECT TOP 1 ID FROM ReservasStatus WHERE Nome = 'Em Uso')) +   
+                        (SELECT COUNT(1) FROM ReservasFila WHERE DataDeLiberacao IS NOT NULL);  
+                     
+                    DECLARE @MesasTotal INT = (SELECT COUNT(1) FROM Mesas);  
+
+                    IF (@ReservasAtivasELiberadas < @MesasTotal)
                     BEGIN
-                        SELECT 1;
+                        SELECT 0;
                     END
                     ELSE
                     BEGIN
-                        SELECT 0;
+                        SELECT 1;
                     END") == 1;
             }
         }
@@ -231,8 +244,9 @@ namespace Api.Dac
 	                	RS.Nome AS Status
 	                FROM Reservas R
 	                INNER JOIN ReservasStatus RS ON RS.ID = R.StatusID
-                    INNER JOIN ReservasFila RF ON RF.Reserva = R.ID
+                    INNER JOIN ReservasFila RF ON RF.ReservaID = R.ID
 	                WHERE RS.Nome = 'Em Fila'
+                    AND RF.DataDeLiberacao IS NULL
                     ORDER BY R.ID;").AsList();
             }
         }
@@ -242,14 +256,14 @@ namespace Api.Dac
             using (SqlConnection con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection")))
             {
                 con.Execute(@"
-                    UPDATE ReservasFila 
-                    SET MinutosDeEspera = @Minutos 
-                    WHERE ID = @ReservaID;",
-                    reservas.Select(x => new
-                    {
-                        ReservaID = x.Id,
-                        Minutos = x.MinutosDeEspera
-                    }));
+                UPDATE ReservasFila 
+                SET MinutosDeEspera = @Minutos 
+                WHERE ReservaID = @ReservaID;",
+                reservas.Select(x => new
+                {
+                    ReservaID = x.Id,
+                    Minutos = x.MinutosDeEspera
+                }));
             }
         }
 
